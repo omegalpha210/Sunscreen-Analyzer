@@ -165,17 +165,15 @@ if st.button(L["btn_analyze"]):
         else:
             st.markdown(f'<div style="padding:15px; border-radius:10px; margin-bottom:20px; background-color:#FAFAFA; border-left:5px solid #9E9E9E;"><div style="font-size:18px; font-weight:800; color:#616161; margin-bottom:5px;">{L["none_title"]}</div><div style="font-size:13px; color:#555;">{L["none_desc"]}</div></div>', unsafe_allow_html=True)
 
-        col1, col2 = st.columns(2)
-        with col1:
+        # 1. 자외선 차단 성분 행 (무기 / 유기)
+        col_uv1, col_uv2 = st.columns(2)
+        with col_uv1:
             st.markdown(f"### {L['inorg_title']}")
-            for item in inorg: st.markdown(f'<div class="result-card inorganic-card"><div class="card-title">🛡️ {item["display"]}</div><div class="card-info">{L["range"]}: {item["range"]}<br>Peak: {item["peak"]}</div></div>', unsafe_allow_html=True)
+            for item in inorg: 
+                st.markdown(f'<div class="result-card inorganic-card"><div class="card-title">🛡️ {item["display"]}</div><div class="card-info">{L["range"]}: {item["range"]}<br>Peak: {item["peak"]}</div></div>', unsafe_allow_html=True)
             if not inorg: st.info(L["empty"])
-            
-            st.markdown(f"### {L['clog_title']}")
-            for item in clog: st.markdown(f'<div class="result-card clogger-card"><div class="card-title">⚠️ {item["display"]}</div><div class="score-tag">{L["comedo_score"]}: {item["score"]}/5</div></div>', unsafe_allow_html=True)
-            if not clog: st.success(L["empty"])
 
-        with col2:
+        with col_uv2:
             st.markdown(f"### {L['org_title']}")
             for item in org: 
                 gen_html = f'<span class="gen-new">{L["tag_new"]}</span>' if "신형" in item["gen"] or "New" in item["gen"] else f'<span class="gen-old">{L["tag_old"]}</span>' if item["gen"] else ""
@@ -184,9 +182,19 @@ if st.button(L["btn_analyze"]):
                 
                 st.markdown(f'<div class="result-card organic-card"><div class="card-title">🧬 {item["display"]} {gen_html}</div>{reef_html}{hormone_html}<div class="card-info">{L["range"]}: {item["range"]}<br>Peak: {item["peak"]}</div></div>', unsafe_allow_html=True)
             if not org: st.info(L["empty"])
-            
+
+        # 2. 피부 주의 성분 행 (모공 막힘 / 모낭염)
+        col_skin1, col_skin2 = st.columns(2)
+        with col_skin1:
+            st.markdown(f"### {L['clog_title']}")
+            for item in clog: 
+                st.markdown(f'<div class="result-card clogger-card"><div class="card-title">⚠️ {item["display"]}</div><div class="score-tag">{L["comedo_score"]}: {item["score"]}/5</div></div>', unsafe_allow_html=True)
+            if not clog: st.success(L["empty"])
+
+        with col_skin2:
             st.markdown(f"### {L['folli_title']}")
-            for item in folli: st.markdown(f'<div class="result-card folliculitis-card"><div class="card-title">🍄 {item["display"]}</div><div class="card-info">{item["desc"]}</div></div>', unsafe_allow_html=True)
+            for item in folli: 
+                st.markdown(f'<div class="result-card folliculitis-card"><div class="card-title">🍄 {item["display"]}</div><div class="card-info">{item["desc"]}</div></div>', unsafe_allow_html=True)
             if not folli: st.success(L["empty"])
             
         st.markdown("---")
