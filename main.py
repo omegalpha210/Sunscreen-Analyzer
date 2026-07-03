@@ -10,7 +10,7 @@ st.set_page_config(page_title="Sunscreen Analyzer", page_icon="☀️", layout="
 UI = {
     "kr": {
         "title": "☀️ 선크림 전성분 상세 분석기",
-        "placeholder": "여기에 전성분 텍스트를 붙여넣기 하세요...",
+        "placeholder": "여기에 전성분 텍스트를 붙여넣기 하세요...(올리브영->원하는 선크림->상품정보 제공고시->화장품법에 따라 기재해야 하는 모든 성분)",
         "btn_sample_kr": "예시: 라운드랩 (한국어)",
         "btn_sample_en": "예시: 라로슈포제 (영어)",
         "btn_analyze": "정밀 분석 시작",
