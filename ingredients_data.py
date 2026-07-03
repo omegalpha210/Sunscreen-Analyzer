@@ -100,6 +100,7 @@ UV_FILTERS = {
     "Octinoxate": {
         "display": {"kr": "옥티노세이트", "en": "Octinoxate"},
         "type": "organic", "range": {"kr": "UVB", "en": "UVB"}, "peak": "310nm",
+        "hormone_harmful": True, # 추가
         "gen": {"kr": "구형", "en": "Old Gen"}, "reef_harmful": True,
         "keywords": ["에틸헥실메톡시신나메이트", "ethylhexyl methoxycinnamate", "옥티노세이트", "octinoxate", "옥틸메톡시신나메이트", "octyl methoxycinnamate"]
     },
@@ -112,12 +113,14 @@ UV_FILTERS = {
     "Avobenzone": {
         "display": {"kr": "아보벤존", "en": "Avobenzone"},
         "type": "organic", "range": {"kr": "UVA1 (장파)", "en": "UVA1 (Long)"}, "peak": "357nm",
+        "hormone_harmful": True, # 추가
         "gen": {"kr": "구형", "en": "Old Gen"}, "reef_harmful": False,
         "keywords": ["부틸메톡시디벤조일메탄", "butyl methoxydibenzoylmethane", "아보벤존", "avobenzone", "parsol 1789"]
     },
     "Oxybenzone": {
         "display": {"kr": "옥시벤존", "en": "Oxybenzone"},
         "type": "organic", "range": {"kr": "UVB + UVA2", "en": "UVB + UVA2"}, "peak": "288nm, 325nm",
+        "hormone_harmful": True, # 추가
         "gen": {"kr": "구형", "en": "Old Gen"}, "reef_harmful": True,
         "keywords": ["벤조페논-3", "benzophenone-3", "oxybenzone"]
     },
@@ -136,6 +139,7 @@ UV_FILTERS = {
     "Homosalate": {
         "display": {"kr": "호모살레이트", "en": "Homosalate"},
         "type": "organic", "range": {"kr": "UVB", "en": "UVB"}, "peak": "306nm",
+        "hormone_harmful": True, # 추가
         "gen": {"kr": "구형", "en": "Old Gen"}, "reef_harmful": False,
         "keywords": ["호모살레이트", "homosalate"]
     },
@@ -148,6 +152,7 @@ UV_FILTERS = {
     "4-MBC": {
         "display": {"kr": "4-MBC", "en": "4-MBC"},
         "type": "organic", "range": {"kr": "UVB", "en": "UVB"}, "peak": "300nm",
+        "hormone_harmful": True, # 추가
         "gen": {"kr": "구형", "en": "Old Gen"}, "reef_harmful": False,
         "keywords": ["4-메틸벤질리덴캠퍼", "4-methylbenzylidene camphor", "4-mbc"]
     },
