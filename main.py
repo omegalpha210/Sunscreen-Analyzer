@@ -111,42 +111,61 @@ def standardize(text):
     for old, new in subs.items(): text = text.replace(old, new)
     return text
 
+def tokenize(text):
+    """전성분 텍스트를 쉼표/슬래시/불릿 등 구분자 기준으로 개별 성분 단위로 분리"""
+    if not text: return []
+    parts = re.split(r'[,\n;/•·、]+', text)
+    return [p.strip() for p in parts if p.strip()]
+
 def analyze():
-    std_input = standardize(input_text)
+    tokens = tokenize(input_text)
+    std_tokens = [standardize(t) for t in tokens]
+
     res_inorganic, res_organic, res_cloggers, res_folliculitis = [], [], [], []
 
+    # UV 필터 / 모공막힘 성분: 성분 하나(토큰)와 키워드가 "완전히 일치"할 때만 매칭
+    # -> "부틸옥틸살리실레이트" 안에 "옥틸살리실레이트"가 부분 포함되어 있어도
+    #    서로 다른 성분이므로 더 이상 오매칭되지 않음
     for key, data in UV_FILTERS.items():
+        found_kw = None
         for kw in data['keywords']:
-            std_kw = standardize(kw)
-            if std_kw in std_input:
-                # Zinc 오진 방지
-                if (std_kw == "zinc" or std_kw == "zincoxide") and "zincoxide" not in std_input and "징크옥사이드" not in std_input:
-                    continue
-                
-                item = {
-                    "display": f"{data['display'][lang]} ({kw})",
-                    "range": data['range'][lang], 
-                    "peak": data['peak'],
-                    "gen": data['gen'][lang] if data['gen'] else "",
-                    "reef_harmful": data.get('reef_harmful', False),
-                    "hormone_harmful": data.get('hormone_harmful', False)
-                }
-                if data['type'] == 'inorganic': res_inorganic.append(item)
-                else: res_organic.append(item)
+            if standardize(kw) in std_tokens:
+                found_kw = kw
                 break
+        if found_kw:
+            item = {
+                "display": f"{data['display'][lang]} ({found_kw})",
+                "range": data['range'][lang],
+                "peak": data['peak'],
+                "gen": data['gen'][lang] if data['gen'] else "",
+                "reef_harmful": data.get('reef_harmful', False),
+                "hormone_harmful": data.get('hormone_harmful', False)
+            }
+            if data['type'] == 'inorganic': res_inorganic.append(item)
+            else: res_organic.append(item)
 
     for key, info in PORE_CLOGGERS.items():
+        found_kw = None
         for kw in info['keywords']:
-            if standardize(kw) in std_input:
-                res_cloggers.append({"display": f"{info['display'][lang]} ({kw})", "score": info['score']})
+            if standardize(kw) in std_tokens:
+                found_kw = kw
                 break
+        if found_kw:
+            res_cloggers.append({"display": f"{info['display'][lang]} ({found_kw})", "score": info['score']})
 
+    # 모낭염 주의 성분: "발효", "폴리소르베이트"처럼 뒤에 숫자/단어가 붙는 뿌리(root) 키워드가 있어
+    # 부분일치가 필요하므로 유지하되, 성분 하나(토큰) 내부에서만 검사해 다른 성분과 경계를 넘어
+    # 우연히 이어붙어 생기는 오매칭은 방지
     for key, info in FOLLICULITIS_TRIGGERS.items():
+        found_kw = None
         for kw in info['keywords']:
-            if standardize(kw) in std_input:
-                res_folliculitis.append({"display": f"{info['display'][lang]} ({kw})", "desc": info['desc'][lang]})
+            std_kw = standardize(kw)
+            if any(std_kw in tok for tok in std_tokens):
+                found_kw = kw
                 break
-                    
+        if found_kw:
+            res_folliculitis.append({"display": f"{info['display'][lang]} ({found_kw})", "desc": info['desc'][lang]})
+
     return res_inorganic, res_organic, res_cloggers, res_folliculitis
 
 if st.button(L["btn_analyze"]):
