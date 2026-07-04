@@ -122,11 +122,6 @@ def analyze():
                 # Zinc 오진 방지
                 if (std_kw == "zinc" or std_kw == "zincoxide") and "zincoxide" not in std_input and "징크옥사이드" not in std_input:
                     continue
-                # [오진 방지 로직 2] 부틸옥틸살리실레이트 예외 처리 (옥티살레이트로 오인하는 것 방지)
-                if "부틸옥틸" in std_token and "부틸" not in std_kw:
-                    continue
-                if "butyloctyl" in std_token and "butyl" not in std_kw:
-                    continue
                 
                 item = {
                     "display": f"{data['display'][lang]} ({kw})",
