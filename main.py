@@ -106,15 +106,18 @@ input_text = st.text_area(L["placeholder"], value=st.session_state.input_val, he
 
 def standardize(text):
     if not text: return ""
+    # "(3%)", "7.3%" 같은 농도 표기는 성분명이 아니므로 매칭 전에 제거
+    # (단, %가 붙지 않은 숫자는 "1,2-헥산다이올"처럼 성분명 일부일 수 있어 그대로 둠)
+    text = re.sub(r'\(?\s*\d+(\.\d+)?\s*%\s*\)?', '', text)
     text = re.sub(r'[^가-힣a-zA-Z0-9]', '', text).lower()
     subs = {"메칠": "메틸", "에칠": "에틸", "다이": "디", "트라이": "트리", "아이소": "이소"}
     for old, new in subs.items(): text = text.replace(old, new)
     return text
 
 def tokenize(text):
-    """전성분 텍스트를 쉼표/슬래시/불릿 등 구분자 기준으로 개별 성분 단위로 분리"""
+    """전성분 텍스트를 쉼표/슬래시/불릿/탭/줄바꿈 등 구분자 기준으로 개별 성분 단위로 분리"""
     if not text: return []
-    parts = re.split(r'[,\n;/•·、]+', text)
+    parts = re.split(r'[,\n;/•·、\t]+', text)
     return [p.strip() for p in parts if p.strip()]
 
 def analyze():
