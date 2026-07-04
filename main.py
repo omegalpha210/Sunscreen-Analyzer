@@ -112,30 +112,51 @@ def standardize(text):
     return text
 
 def analyze():
-    std_input = standardize(input_text)
+    # 1. 분리 작업: 쉼표, 점 등으로 쪼개고, 없으면 공백으로 쪼개서 리스트화함
+    raw_tokens = re.split(r'[,•/\n\t|·]', input_text)
+    if len(raw_tokens) <= 1:
+        raw_tokens = input_text.split()
+    tokens = [t.strip() for t in raw_tokens if t.strip()]
+    
     res_inorganic, res_organic, res_cloggers, res_folliculitis = [], [], [], []
+    seen_filters, seen_cloggers, seen_folli = set(), set(), set()
 
-    for key, data in UV_FILTERS.items():
-        for kw in data['keywords']:
-            std_kw = standardize(kw)
-            if std_kw in std_input:
-                # Zinc 오진 방지
-                if (std_kw == "zinc" or std_kw == "zincoxide") and "zincoxide" not in std_input and "징크옥사이드" not in std_input:
-                    continue
-                if ("부틸옥틸" in std_token or "butyloctyl" in std_token) and "부틸" not in std_kw and "butyl" not in std_kw:
-                    continue
+    for token in tokens:
+        std_token = standardize(token) # 개별 성분 단어를 표준화
+        if len(std_token) < 2: continue
+
+        # 1. 자외선 차단 필터 분석
+        for key, data in UV_FILTERS.items():
+            if key in seen_filters: continue
+            for kw in data['keywords']:
+                std_kw = standardize(kw)
                 
-                item = {
-                    "display": f"{data['display'][lang]} ({kw})",
-                    "range": data['range'][lang], 
-                    "peak": data['peak'],
-                    "gen": data['gen'][lang] if data['gen'] else "",
-                    "reef_harmful": data.get('reef_harmful', False),
-                    "hormone_harmful": data.get('hormone_harmful', False)
-                }
-                if data['type'] == 'inorganic': res_inorganic.append(item)
-                else: res_organic.append(item)
-                break
+                # 핵심: 전체 텍스트가 아니라 '개별 성분(std_token)' 안에 키워드가 있는지 확인
+                if std_kw in std_token:
+                    
+                    # [오진 방지 1] 부틸옥틸살리실레이트 건너뛰기
+                    # 성분명에 '부틸옥틸'이 들어있는데, 정작 내가 찾는 키워드엔 '부틸'이 없다면 옥티살레이트 오진으로 판단!
+                    if ("부틸옥틸" in std_token or "butyloctyl" in std_token) and ("부틸" not in std_kw and "butyl" not in std_kw):
+                        continue
+                        
+                    # [오진 방지 2] Zinc PCA 등이 징크옥사이드로 오진되는 것 방지
+                    if std_kw == "zinc" and "oxide" not in std_token and "아연" not in std_token:
+                        continue
+                    
+                    item = {
+                        "display": f"{data['display'][lang]} ({token})",
+                        "range": data['range'][lang], 
+                        "peak": data['peak'],
+                        "gen": data['gen'][lang] if data['gen'] else "",
+                        "reef_harmful": data.get('reef_harmful', False),
+                        "hormone_harmful": data.get('hormone_harmful', False)
+                    }
+                    if data['type'] == 'inorganic': res_inorganic.append(item)
+                    else: res_organic.append(item)
+                    seen_filters.add(key)
+                    break
+        
+        # ... (이하 모공 막힘, 모낭염 분석 로직은 기존과 동일)
 
     for key, info in PORE_CLOGGERS.items():
         for kw in info['keywords']:
