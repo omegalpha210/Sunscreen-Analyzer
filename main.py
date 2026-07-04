@@ -122,6 +122,8 @@ def analyze():
                 # Zinc 오진 방지
                 if (std_kw == "zinc" or std_kw == "zincoxide") and "zincoxide" not in std_input and "징크옥사이드" not in std_input:
                     continue
+                if ("부틸옥틸" in std_token or "butyloctyl" in std_token) and "부틸" not in std_kw and "butyl" not in std_kw:
+                    continue
                 
                 item = {
                     "display": f"{data['display'][lang]} ({kw})",
