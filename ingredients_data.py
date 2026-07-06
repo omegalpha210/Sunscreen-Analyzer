@@ -190,7 +190,7 @@ FOLLICULITIS_TRIGGERS = {
     },
     "Esters/Oils": {
         "display": {"kr": "에스테르/오일류", "en": "Esters & Oils"},
-        "keywords": ["폴리소르베이트", "글리세릴스테아레이트", "에틸헥실팔미테이트", "아이소프로필팔미테이트", "polysorbate", "glyceryl stearate", "isopropyl palmitate", "ethylhexyl palmitate"], 
+        "keywords": ["폴리소르베이트","폴리솔베이트", "글리세릴스테아레이트", "에틸헥실팔미테이트", "아이소프로필팔미테이트", "polysorbate", "glyceryl stearate", "isopropyl palmitate", "ethylhexyl palmitate"], 
         "desc": {"kr": "진균 증식을 돕는 환경을 조성합니다.", "en": "Creates an environment that helps fungi thrive."}
     },
     "Fermented": {
