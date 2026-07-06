@@ -115,24 +115,47 @@ def standardize(text):
     return text
 
 def tokenize(text):
-    """전성분 텍스트를 쉼표/슬래시/불릿/탭/줄바꿈 등 구분자 기준으로 개별 성분 단위로 분리"""
+    """전성분 텍스트를 쉼표/탭/줄바꿈/불릿 등 '확실한' 구분자로 1차 분리.
+    "/"는 AQUA/WATER, 꽃/잎추출물, OOO/OOO코폴리머처럼 성분명 자체에 쓰이는 경우가 많아 구분자에서 제외."""
     if not text: return []
-    parts = re.split(r'[,\n;/•·、\t]+', text)
+    parts = re.split(r'[,\n;•·、\t]+', text)
     return [p.strip() for p in parts if p.strip()]
 
+def build_match_pools(text, max_words=5):
+    """
+    쉼표 없이 공백으로만 나열된 성분 목록("성분1 성분2 성분3...")과
+    'ETHYLHEXYL SALICYLATE'처럼 한 성분명 안에 공백이 있는 영문 표기를 모두 지원하기 위해
+    두 종류의 검색 후보군을 만든다.
+    - words: 공백 기준으로 쪼갠 낱개 단어들 (모낭염 주의 성분처럼 뿌리(root) 부분일치가 필요한 경우용)
+    - candidates: 같은 덩어리 안에서 이어지는 단어 1~max_words개 조합 전체 (UV필터/모공막힘의 "완전일치"용)
+    """
+    chunks = tokenize(text)
+    words, candidates = [], set()
+    for chunk in chunks:
+        chunk_words = chunk.split()
+        words.extend(chunk_words)
+        candidates.add(chunk)
+        n = len(chunk_words)
+        for i in range(n):
+            for j in range(i + 1, min(i + max_words, n) + 1):
+                candidates.add(' '.join(chunk_words[i:j]))
+    return words, candidates
+
 def analyze():
-    tokens = tokenize(input_text)
-    std_tokens = [standardize(t) for t in tokens]
+    words, candidates = build_match_pools(input_text)
+    std_words = [standardize(w) for w in words]
+    std_candidates = {standardize(c) for c in candidates}
+    std_candidates.discard("")
 
     res_inorganic, res_organic, res_cloggers, res_folliculitis = [], [], [], []
 
-    # UV 필터 / 모공막힘 성분: 성분 하나(토큰)와 키워드가 "완전히 일치"할 때만 매칭
+    # UV 필터 / 모공막힘 성분: 후보군과 키워드가 "완전히 일치"할 때만 매칭
     # -> "부틸옥틸살리실레이트" 안에 "옥틸살리실레이트"가 부분 포함되어 있어도
-    #    서로 다른 성분이므로 더 이상 오매칭되지 않음
+    #    단어를 잘라서 만든 후보가 아니므로 더 이상 오매칭되지 않음
     for key, data in UV_FILTERS.items():
         found_kw = None
         for kw in data['keywords']:
-            if standardize(kw) in std_tokens:
+            if standardize(kw) in std_candidates:
                 found_kw = kw
                 break
         if found_kw:
@@ -150,20 +173,20 @@ def analyze():
     for key, info in PORE_CLOGGERS.items():
         found_kw = None
         for kw in info['keywords']:
-            if standardize(kw) in std_tokens:
+            if standardize(kw) in std_candidates:
                 found_kw = kw
                 break
         if found_kw:
             res_cloggers.append({"display": f"{info['display'][lang]} ({found_kw})", "score": info['score']})
 
     # 모낭염 주의 성분: "발효", "폴리소르베이트"처럼 뒤에 숫자/단어가 붙는 뿌리(root) 키워드가 있어
-    # 부분일치가 필요하므로 유지하되, 성분 하나(토큰) 내부에서만 검사해 다른 성분과 경계를 넘어
-    # 우연히 이어붙어 생기는 오매칭은 방지
+    # 부분일치가 필요하므로 유지하되, 개별 단어(word) 하나 내부에서만 검사해 다른 성분과 경계를
+    # 넘어 우연히 이어붙어 생기는 오매칭은 방지
     for key, info in FOLLICULITIS_TRIGGERS.items():
         found_kw = None
         for kw in info['keywords']:
             std_kw = standardize(kw)
-            if any(std_kw in tok for tok in std_tokens):
+            if any(std_kw in w for w in std_words):
                 found_kw = kw
                 break
         if found_kw:
